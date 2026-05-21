@@ -14,6 +14,7 @@ import { extractApiError } from "@/utils/apiError";
 
 const initialState = { name: "", email: "", address: "", password: "", confirmPassword: "" };
 
+
 export default function RegisterPage() {
   useGuestRoute();
   const { register } = useAuth();
