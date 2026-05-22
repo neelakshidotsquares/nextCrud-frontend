@@ -17,6 +17,8 @@ export const endpoints = {
     process.env.NEXT_PUBLIC_API_DELETE_ACCOUNT || "/user/deleteUser/:id",
   uploadAvatar:
     process.env.NEXT_PUBLIC_API_UPLOAD_IMAGE || "/user/uploadAvatar/:id",
+  listUsers:
+    process.env.NEXT_PUBLIC_API_LIST_USERS || "/user/getAllUser",
 };
 
 /**

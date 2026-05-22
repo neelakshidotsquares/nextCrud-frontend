@@ -21,7 +21,45 @@ function requireId(id, action) {
   if (!id) throw new Error(`A user id is required to ${action}.`);
 }
 
+/**
+ * Normalize the paginated list response to a stable shape regardless of
+ * what the backend named the array (`User`, `users`, `data`, …).
+ */
+function pickUserList(payload) {
+  if (!payload) return { users: [], page: 1, limit: 10, total: 0, totalPages: 0 };
+  const users = Array.isArray(payload)
+    ? payload
+    : payload.User ?? payload.users ?? payload.data ?? [];
+  return {
+    users: Array.isArray(users) ? users : [],
+    page: Number(payload.page) || 1,
+    limit: Number(payload.limit) || users.length || 10,
+    total: Number(payload.total) || (Array.isArray(users) ? users.length : 0),
+    totalPages:
+      Number(payload.totalPages) ||
+      (Number(payload.total) && Number(payload.limit)
+        ? Math.ceil(Number(payload.total) / Number(payload.limit))
+        : 0),
+  };
+}
+
 export const userService = {
+  /**
+   * Fetch a paginated list of all users.
+   * Endpoint: GET /user/getAllUser?page=&limit=
+   * Response: { status, success, message, User: [...], page, limit, total, totalPages }
+   *
+   * Always returns the same shape — empty array + zero counts when there's
+   * nothing to show. Callers don't need to special-case "no users" vs. "page
+   * out of range".
+   */
+  async listUsers({ page = 1, limit = 10 } = {}) {
+    const { data } = await apiClient.get(endpoints.listUsers, {
+      params: { page, limit },
+    });
+    return pickUserList(data);
+  },
+
   /**
    * Fetch a user's full profile.
    * Endpoint: GET /user/getUserById/:id
